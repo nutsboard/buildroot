@@ -1,4 +1,4 @@
-= NutsBoard Buildroot BSP
+= Nutsboard Buildroot BSP
 
 Environment Setup
 
@@ -24,12 +24,12 @@ To get the BSP you need to have repo installed and use it as:
 Download the BSP source:
 
 [source,console]
-% git clone https://github.com/mayqueenEMBEDDED/buildroot.git
+% git clone https://github.com/nutsboard/buildroot.git
 % cd buildroot
-% git checkout 201608_4.4.19-1.1.0_ga
+% git checkout 201611_4.4.19-1.1.0_ga
 
 
-To generate the configure (ex: st7b2)
+To generate the configure (ex: Almond SoM)
 [source,console]
 % make nutsboard_almond_defconfig
 % make -j8
@@ -43,4 +43,3 @@ flashcard the card:
 [source,console]
 % sudo dd if=sdcard.img of=/dev/sdx bs=1M
 NOTE: sdx is your device node
-
