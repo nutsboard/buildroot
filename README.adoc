@@ -26,7 +26,7 @@ Download the BSP source:
 [source,console]
 % git clone https://github.com/nutsboard/buildroot.git
 % cd buildroot
-% git checkout 201611_4.4.19-1.1.0_ga
+% git checkout 201611_4.4.32-1.0.0_ga
 
 
 To generate the configure (ex: Almond SoM)
