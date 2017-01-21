@@ -1,10 +1,9 @@
 /*
- * Copyright (C) 2016 Tailyn Technologies, Inc.
- * Author: Wig Cheng <onlywig@gmail.com>
- *         Chris Hsu <navywei0521@gmail.com>
- *         Bernie Chen <s99056020@cs.nchu.edu.tw>
- *
+ * Copyright (C) 2017 NutsBoard - http://www.nutsboard.org/
  * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * Author: Bernie Chen <s99056020@cs.nchu.edu.tw>
+ *         Wig Cheng <onlywig@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -18,8 +17,8 @@
 #include <dt-bindings/interrupt-controller/irq.h>
 
 / {
-	model = "Tailyn AM335x ST7B2 board";
-	compatible = "ti,am335x-evmsk", "ti,am33xx";
+	model = "TI AM335x Nusboard Almond SoM";
+	compatible = "ti,am335x-nutsboard-almond", "ti,am33xx";
 
 	cpus {
 		cpu@0 {
@@ -40,18 +39,12 @@
 		regulator-boot-on;
 	};
 
-	lis3_reg: fixedregulator@1 {
-		compatible = "regulator-fixed";
-		regulator-name = "lis3_reg";
-		regulator-boot-on;
-	};
-
 	wlan_en_reg: fixedregulator@2 {
 		pinctrl-names = "default";
 		pinctrl-0 = <&wl18xx_gpio>;
 		compatible = "regulator-fixed";
 		regulator-name = "vwl1271";
-		gpio = <&gpio3 8 0>;
+		gpio = <&gpio1 13 0>;
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1800000>;
 		startup-delay-us = <70000>;
@@ -169,13 +162,13 @@
 
 		app_led {
 			label = "APP_LED";
-			gpios = <&gpio0 17 1>;
+			gpios = <&gpio3 7 1>;
 			dir   = "out";
 		};
 
 		wlan_led {
 			label = "WLAN_LED";
-			gpios = <&gpio0 16 1>;
+			gpios = <&gpio3 8 1>;
 			dir   = "out";
 		};
 
@@ -184,18 +177,38 @@
 			gpios = <&gpio3 0 0>;
 			dir   = "out";
 		};
+
+		pcie_en {
+			label = "PCIE_EN";
+			gpios = <&gpio0 6 1>;
+			dir   = "out";
+		};
 	};
+
+	kim {
+		compatible = "kim";
+		nshutdown_gpio = <44>;
+		dev_name = "/dev/ttyO0";
+		flow_cntrl = <0>;
+		baud_rate = <3000000>;
+	};
+
+	btwilink {
+		compatible = "btwilink";
+	};
+
 };
 
 &am33xx_pinmux {
 	pinctrl-names = "default";
 	pinctrl-0 = <&st7b2_led_gpio>;
 
-	st7b2_led_gpio: st7b2_led_gpio {
+		st7b2_led_gpio: st7b2_led_gpio {
 		pinctrl-single,pins = <
-			0x120 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* mii1_txd2.gpio0_17*/
-			0x11c (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* mii1_txd3.gpio0_16 */
+			0x1e4 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* emu0.gpio3_7 */
+			0x1e8 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* emu1.gpio3_8 */
 			0x108 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* mii1_col.gpio3_0 */
+			0x160 (PIN_OUTPUT_PULLDOWN | MUX_MODE7) /* spi0_cs1.gpio0_6 */
 		>;
 	};
 
@@ -212,10 +225,29 @@
 		>;
 	};
 
+	spi1_pins_default: spi1_pins_default {
+		pinctrl-single,pins = <
+			0x190 (PIN_INPUT_PULLUP | MUX_MODE2)	/* mcasp0_aclkx.spi1_sclk */
+			0x194 (PIN_INPUT_PULLUP | MUX_MODE2)	/* mcasp0_fsx.spi1_d0 */
+			0x198 (PIN_INPUT_PULLUP | MUX_MODE2)	/* mcasp0_axr0.spi1_d1 */
+			0x1ac (PIN_INPUT_PULLUP | MUX_MODE2)	/* mcasp0_ahcklx.spi1_cs0 */
+		>;
+	};
+
 	uart0_pins: pinmux_uart0_pins {
 		pinctrl-single,pins = <
-			0x170 (PIN_INPUT_PULLUP | MUX_MODE0)	/* uart0_rxd.uart0_rxd */
-			0x174 (PIN_OUTPUT_PULLDOWN | MUX_MODE0)		/* uart0_txd.uart0_txd */
+			0x174 (PIN_OUTPUT_PULLDOWN | MUX_MODE0) /* uart0_txd.uart0_txd */
+			0x170 (PIN_INPUT_PULLUP | MUX_MODE0)  /* uart0_rxd.uart0_rxd */
+			0x168 (PIN_INPUT | MUX_MODE0) /* uart0_ctsn.d_can1_tx */
+			0x16c (PIN_OUTPUT_PULLDOWN | MUX_MODE0) /* uart0_rtsn.d_can1_rx */
+			0x30 (PIN_OUTPUT_PULLUP | MUX_MODE7)	/* gpmc_ad12.gpio1_12 (BT_EN) */
+		>;
+	};
+
+	uart3_pins: pinmux_uart3_pins {
+		pinctrl-single,pins = <
+			0x134 (PIN_INPUT_PULLUP | MUX_MODE1)  /* mii1_rxd3.uart3_rxd */
+			0x138 (PIN_OUTPUT_PULLDOWN | MUX_MODE1)  /* mii1_rxd2.uart3_txd */
 		>;
 	};
 
@@ -311,7 +343,7 @@
 
 	mmc1_pins: pinmux_mmc1_pins {
 		pinctrl-single,pins = <
-			0x134 (PIN_INPUT | MUX_MODE7) /* mii1_rxd3.gpio2_18 */
+			0x12c (PIN_INPUT | MUX_MODE7)  /* mii1_txclk.gpio3_9 */
 		>;
 	};
 
@@ -323,20 +355,20 @@
 			0x24 (PIN_INPUT_PULLUP | MUX_MODE2) /* gpmc_ad9.mmc1_dat1 */
 			0x28 (PIN_INPUT_PULLUP | MUX_MODE2) /* gpmc_ad10.mmc1_dat2 */
 			0x2c (PIN_INPUT_PULLUP | MUX_MODE2) /* gpmc_ad11.mmc1_dat3 */
-			0x1e4 (PIN_INPUT_PULLUP | MUX_MODE7) /* emu1.gpio3_7 (WLAN_IRQ) */
+			0x38 (PIN_INPUT_PULLUP | MUX_MODE7)	/* gpmc_ad14.gpio1_14 (WLAN_IRQ) */
 		>;
 	};
 
 	wl18xx_gpio: pinmux_wl18xx_gpio {
 		pinctrl-single,pins = <
-			0x1e8 (PIN_OUTPUT_PULLUP | MUX_MODE7) /* emu1.gpio3_8 (WLAN_EN) */
+			0x34 (PIN_OUTPUT_PULLUP | MUX_MODE7) /* gpmc_ad13.gpio1_13 (WLAN_EN) */
 		>;
 	};
 
-	dcan1_pins_default: dcan1_pins_default {
+	dcan0_pins_default: dcan0_pins_default {
 		pinctrl-single,pins = <
-			0x168 (PIN_OUTPUT | MUX_MODE2) /* uart0_ctsn.d_can1_tx */
-			0x16c (PIN_INPUT_PULLDOWN | MUX_MODE2) /* uart0_rtsn.d_can1_rx */
+			0x11c (PIN_OUTPUT | MUX_MODE1) /* mii1_txd3.d_can0_tx */
+			0x120 (PIN_INPUT_PULLDOWN | MUX_MODE1) /* mii1_txd2.d_can0_rx*/
 		>;
 	};
 
@@ -379,6 +411,12 @@
 	status = "okay";
 };
 
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart3_pins>;
+	status = "okay";
+};
+
 &i2c1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&i2c1_pins>;
@@ -411,6 +449,15 @@
 	};
 
 };
+
+&spi0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi1_pins_default>;
+
+
+};
+
 
 #include "tps65910.dtsi"
 &tps {
@@ -508,6 +555,13 @@
 &usb0 {
 	status = "okay";
 	dr_mode = "host";
+};
+
+&tscadc {
+	status = "okay";
+	adc {
+		ti,adc-channels = <1 2 3 4 5 6 7>;
+	};
 };
 
 #include "tps65910.dtsi"
@@ -626,17 +680,17 @@
 	bus-width = <4>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc1_pins>;
-	cd-gpios = <&gpio2 18 GPIO_ACTIVE_LOW>;
+	cd-gpios = <&gpio3 9 GPIO_ACTIVE_LOW>;
 };
 
 &gpio0 {
 	ti,no-reset-on-init;
 };
 
-&dcan1 {
-        status = "okay";    /* Enable only if Profile 1 is selected */
-        pinctrl-names = "default";
-        pinctrl-0 = <&dcan1_pins_default>;
+&dcan0 {
+	status = "okay";    /* Enable only if Profile 1 is selected */
+	pinctrl-names = "default";
+	pinctrl-0 = <&dcan0_pins_default>;
 };
 
 &mmc2 {
@@ -653,8 +707,8 @@
 	wlcore: wlcore@2 {
 		compatible = "ti,wl1831";
 		reg = <2>;
-		interrupt-parent = <&gpio3>;
-		interrupts = <7 IRQ_TYPE_LEVEL_HIGH>;
+		interrupt-parent = <&gpio1>;
+		interrupts = <14 IRQ_TYPE_LEVEL_HIGH>;
 		ref-clock-frequency = <38400000>;
 		tcxo-clock-frequency = <26000000>;
 	};
@@ -747,5 +801,3 @@
 		};
 	};
 };
-                       
-

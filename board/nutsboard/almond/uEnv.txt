@@ -1,4 +1,4 @@
-bootargs=console=ttyO0,115200n8 root=/dev/mmcblk0p2 mem=256M rootwait
+bootargs=console=ttyO3,115200n8 root=/dev/mmcblk0p2 mem=256M rootwait
 loadimage=mmc rescan; fatload mmc 0 0x82000000 zImage;
 loadfdt=mmc rescan; fatload mmc 0 0x88000000 am335x-nutsboard-almond.dtb;
 bootcmd=run loadimage; run loadfdt; bootz 0x82000000 - 0x88000000
