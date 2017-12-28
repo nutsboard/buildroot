@@ -1,25 +1,18 @@
 #!/bin/sh
-# post-build.sh for Almond SoM
+# post-build.sh for Pistachio SBC
 # 2017, Wig Cheng <onlywig@gmail.com>
 
 BOARD_DIR="$(dirname $0)"
 
-# copy the uEnv.txt to the output/images directory
-cp board/nutsboard/pistachio/uEnv.txt $BINARIES_DIR/uEnv.txt
 
-GENIMAGE_CFG="${BOARD_DIR}/genimage.cfg"
-GENIMAGE_TMP="${BUILD_DIR}/genimage.tmp"
+# copy the uEnv.txt to the output/images directory
+install -m 0644 -D ${BOARD_DIR}/uEnv.txt $BINARIES_DIR/uEnv.txt
 
 # copy the jorjin wg7833 WiFi/Bluetooth firmware
 mkdir -p ${TARGET_DIR}/lib/firmware/ti-connectivity/
-cp -rv ${BOARD_DIR}/rootfs-additions/firmware/ti-connectivity ${TARGET_DIR}/lib/firmware/
-
-rm -rf "${GENIMAGE_TMP}"
-
-genimage \
-  --rootpath "${TARGET_DIR}" \
-  --tmppath "${GENIMAGE_TMP}" \
-  --inputpath "${BINARIES_DIR}" \
-  --outputpath "${BINARIES_DIR}" \
-  --config "${GENIMAGE_CFG}"
-
+install -m 0644 -D ${BOARD_DIR}/rootfs-additions/firmware/ti-connectivity/TIInit_11.8.32.bts ${TARGET_DIR}/lib/firmware/ti-connectivity/
+install -m 0644 -D ${BOARD_DIR}/rootfs-additions/firmware/ti-connectivity/WL1835MOD_INI_C2PC.ini ${TARGET_DIR}/lib/firmware/ti-connectivity/
+install -m 0644 -D ${BOARD_DIR}/rootfs-additions/firmware/ti-connectivity/wl18xx-conf.bin ${TARGET_DIR}/lib/firmware/ti-connectivity/
+install -m 0644 -D ${BOARD_DIR}/rootfs-additions/firmware/ti-connectivity/wl18xx-fw-2.bin ${TARGET_DIR}/lib/firmware/ti-connectivity/
+install -m 0644 -D ${BOARD_DIR}/rootfs-additions/firmware/ti-connectivity/wl18xx-fw-3.bin ${TARGET_DIR}/lib/firmware/ti-connectivity/
+install -m 0644 -D ${BOARD_DIR}/rootfs-additions/firmware/ti-connectivity/wl18xx-fw-4.bin ${TARGET_DIR}/lib/firmware/ti-connectivity/
